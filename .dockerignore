@@ -1,0 +1,8 @@
+.dockerignore
+
+tmp
+test
+
+# Mix artifacts
+_build
+deps

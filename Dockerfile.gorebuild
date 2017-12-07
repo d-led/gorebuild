@@ -1,0 +1,12 @@
+FROM elixir:1.5
+
+RUN mix local.hex --force \
+    && mkdir -p /home/elixir
+
+COPY . /home/elixir
+
+WORKDIR /home/elixir
+
+RUN mkdir -p /run/elixir
+
+CMD ./start.sh
