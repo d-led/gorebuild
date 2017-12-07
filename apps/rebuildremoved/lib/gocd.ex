@@ -1,0 +1,2 @@
+defmodule Gocd do
+end
