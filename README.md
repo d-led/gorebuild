@@ -4,9 +4,9 @@
 ## Background
 
 
-![](doc/img/vsm.png)
+![](docs/img/vsm.png)
 
-![](doc/img/failure.png)
+![](docs/img/failure.png)
 
 
 ### Other Links
