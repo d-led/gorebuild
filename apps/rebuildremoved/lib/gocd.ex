@@ -17,6 +17,7 @@ defmodule Gocd do
 
 
     defp with_status(job_config = %{pipeline: pipeline}) do
+        # todo: ensure, only if not running already and not failed
         job_config
         |> Map.put(:status, status_of(pipeline))
     end
@@ -35,6 +36,8 @@ defmodule Gocd do
 
     defp trigger_if_missing(artifact, job_config = %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
+
+        post("/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) |> IO.inspect
     end
 
     # implementation

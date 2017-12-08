@@ -2,4 +2,4 @@
 
 set -e
 
-find . -name "start.sh" -exec rm -vf {} \;
+find test/godata -name "start.sh" -exec rm -vf {} \;
