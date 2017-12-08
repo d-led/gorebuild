@@ -23,7 +23,7 @@ defmodule Gocd do
     end
 
 
-    defp trigger_if_necessary(job_config = %{pipeline: pipeline, stage: stage, job: job, paths: paths}) do
+    defp trigger_if_necessary(job_config = %{paths: paths}) do
         artifacts = artifacts_of_latest_run(job_config)
 
         first_mising = paths
@@ -34,7 +34,7 @@ defmodule Gocd do
 
     defp trigger_if_missing(nil, _), do: true #nothing to do
 
-    defp trigger_if_missing(artifact, job_config = %{pipeline: pipeline, stage: stage, job: job}) do
+    defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
 
         post("/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) |> IO.inspect
