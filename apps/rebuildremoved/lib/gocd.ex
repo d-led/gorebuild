@@ -62,7 +62,5 @@ defmodule Gocd do
         end
     end
 
-    def hi do
-        Logger.info @gocd.url
-    end
+    def url, do: @gocd.url
 end
