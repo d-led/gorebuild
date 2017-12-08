@@ -12,8 +12,7 @@ defmodule Rebuildremoved.Worker do
   end
 
   def init(job_config) do
-    check(job_config)
-    schedule_next()
+    schedule_next(1000)
     {:ok, job_config}
   end
 
@@ -21,7 +20,7 @@ defmodule Rebuildremoved.Worker do
 
   def handle_info(:check, job_config) do
    check(job_config)
-   {:noreply, job_config}   
+   {:noreply, job_config}
   end
 
   # implementation
@@ -32,5 +31,5 @@ defmodule Rebuildremoved.Worker do
     schedule_next()
   end
 
-  defp schedule_next, do: Process.send_after(self(), :check, @delay_ms)
+  defp schedule_next(delay_ms \\ @delay_ms), do: Process.send_after(self(), :check, delay_ms)
 end
