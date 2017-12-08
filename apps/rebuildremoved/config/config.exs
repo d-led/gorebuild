@@ -11,7 +11,17 @@ use Mix.Config
 # You can configure your application as:
 #
 config :rebuildremoved,
+    delay_ms: 30*1000,
     artifacts: [
+        %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
+            paths: [
+                "foo/bar",
+                "foo/bar/start.sh"
+            ]
+        },
+        %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
+            paths: [ "bla/blup" ]
+        }
     ],
     gocd: %{
         url: System.get_env("GO_SERVER_URL") || "https://localhost:8154/go",

@@ -2,6 +2,5 @@
 
 set -e
 
-mix deps.get
 mix clean compile
 mix run --no-halt

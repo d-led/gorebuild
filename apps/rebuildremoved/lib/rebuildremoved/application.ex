@@ -8,11 +8,14 @@ defmodule Rebuildremoved.Application do
 
   def start(_type, _args) do
     Logger.info "starting..."
+
     Gocd.hi()
 
-    children = 1..3 |> Enum.map(fn id ->
-      Supervisor.child_spec(Rebuildremoved.Worker, id: String.to_atom("worker#{id}"))
-    end)
+    children = Application.get_env(:rebuildremoved, :artifacts)
+      |> Enum.with_index
+      |> Enum.map(fn {job_config, id} ->
+        Supervisor.child_spec({Rebuildremoved.Worker, job_config}, id: String.to_atom("worker#{id}"))
+      end)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
