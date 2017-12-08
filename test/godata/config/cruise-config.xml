@@ -44,8 +44,4 @@
       </stage>
     </pipeline>
   </pipelines>
-  <agents>
-    <agent hostname="df6810715b06" ipaddress="172.20.0.4" uuid="292f9731-c88e-4be5-b01c-718be64cc1d5" />
-    <agent hostname="8f0ba33f5b89" ipaddress="172.20.0.3" uuid="ee457c9d-bd45-4a25-adca-d7b6d67a34d7" />
-  </agents>
 </cruise>
