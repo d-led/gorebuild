@@ -7,6 +7,6 @@ COPY . /home/elixir
 
 WORKDIR /home/elixir
 
-RUN mix deps.get && mix clean compile 
+RUN mix deps.get && mix clean compile && ./test.sh
 
 CMD ./start.sh

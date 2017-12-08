@@ -12,7 +12,7 @@ defmodule Gocd do
     def trigger_if_artifacts_missing(job_config) do
         job_config
         |> with_status()
-        |> trigger_if_green()
+        |> trigger_if_necessary()
     end
 
 
@@ -22,11 +22,19 @@ defmodule Gocd do
     end
 
 
-    defp trigger_if_green(job_config = %{pipeline: pipeline, stage: stage, job: job, paths: paths}) do
-        job_config
-        |> artifacts_of_latest_run() 
-        |> IO.inspect
-        #api/pipelines/pipeline1/status
+    defp trigger_if_necessary(job_config = %{pipeline: pipeline, stage: stage, job: job, paths: paths}) do
+        artifacts = artifacts_of_latest_run(job_config)
+
+        first_mising = paths
+            |> Enum.find(&(!GoCDartifacts.contain(artifacts, &1)))
+
+        first_mising |> trigger_if_missing(job_config)
+    end
+
+    defp trigger_if_missing(nil, _), do: true #nothing to do
+
+    defp trigger_if_missing(artifact, job_config = %{pipeline: pipeline, stage: stage, job: job}) do
+        Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
     end
 
     # implementation
@@ -39,7 +47,7 @@ defmodule Gocd do
 
     defp status_of(pipeline) do
         { :ok, %Tesla.Env{body: status} } = get("/api/pipelines/#{pipeline}/status")
-        
+
         status
     end
 
