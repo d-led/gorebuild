@@ -8,6 +8,7 @@ defmodule Rebuildremoved.Application do
 
   def start(_type, _args) do
     Logger.info "starting..."
+    Gocd.hi()
 
     children = 1..3 |> Enum.map(fn id ->
       Supervisor.child_spec(Rebuildremoved.Worker, id: String.to_atom("worker#{id}"))

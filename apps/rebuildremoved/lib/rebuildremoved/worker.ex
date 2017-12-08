@@ -1,5 +1,6 @@
 defmodule Rebuildremoved.Worker do
   use GenServer
+  require Logger
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, [])
@@ -11,7 +12,7 @@ defmodule Rebuildremoved.Worker do
   end
 
   def handle_info(:ping, state) do
-    IO.puts "#{inspect(self())}: #{state}"
+    Logger.info "#{inspect(self())}: #{state}"
     schedule()
     {:noreply, state+1}
   end

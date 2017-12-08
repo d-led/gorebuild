@@ -10,7 +10,14 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :rebuildremoved, key: :value
+config :rebuildremoved,
+    artifacts: [
+    ],
+    gocd: %{
+        url: System.get_env("GO_SERVER_URL") || "https://localhost:8154/go",
+        user: System.get_env("GO_USERNAME"),
+        password: System.get_env("GO_PASSWORD")
+    }
 #
 # and access this configuration in your application as:
 #
