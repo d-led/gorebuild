@@ -1,3 +1,5 @@
+# Queries on GoCD Pipeline Artifacts as returned from the API Call
+# https://api.gocd.org/current/#get-all-artifacts
 defmodule GoCDartifacts do
    def contain([artifact = %{} | rest], path), do: contain(artifact, path) || contain(rest, path)
    def contain(artifact = %{}, path), do: artifact |> contain_(String.split(path,"/",trim: true))

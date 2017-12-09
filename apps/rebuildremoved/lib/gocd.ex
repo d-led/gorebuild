@@ -45,6 +45,7 @@ defmodule Gocd do
     # if no artifacts returned from artifacts_of_latest_run
     defp trigger_if_missing(nil, _), do: true #nothing to do
 
+    # https://api.gocd.org/current/#scheduling-pipelines
     defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
 
@@ -55,6 +56,7 @@ defmodule Gocd do
     end
 
 
+    # https://api.gocd.org/current/#get-all-artifacts
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
         case get("/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
           { :ok, %Tesla.Env{body: files} } -> files
@@ -62,6 +64,7 @@ defmodule Gocd do
         end
     end
 
+    # https://api.gocd.org/current/#get-pipeline-history
     defp passed(pipeline) do
         case get("/api/pipelines/#{pipeline}/history") do
             { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
