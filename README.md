@@ -37,7 +37,7 @@ While the solution is not a systematically optimal one (if keeping N last artifa
 
 ### Links to Problem Descriptions
 
-- gocd/gocd/#4022
-- gocd/gocd/#410
-- gocd/gocd/#1207
+- gocd/gocd#4022
+- gocd/gocd#410
+- gocd/gocd#1207
 - https://groups.google.com/forum/m/#!topic/go-cd/QArd6yLwhl4
