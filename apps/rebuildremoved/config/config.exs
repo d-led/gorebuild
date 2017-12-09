@@ -11,7 +11,7 @@ use Mix.Config
 # You can configure your application as:
 #
 config :rebuildremoved,
-    delay_ms: 5*1000,
+    delay_ms: 10*1000,
     artifacts: [
         %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
             paths: [

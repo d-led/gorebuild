@@ -2,5 +2,5 @@
 
 set -e
 
-mix clean compile
+mix compile
 mix run --no-halt
