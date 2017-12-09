@@ -1,6 +1,6 @@
 # GoRebuild
 
-Service for triggering GoCD pipelines on demand
+Service for triggering GoCD pipelines on demand, implemented in Elixir
 
 contributions & other problem fixes welcome!
 
@@ -26,6 +26,15 @@ The pipeline is not triggered for previously failed or currently running pipelin
 ## Configuration
 
 - see [apps/rebuildremoved/config/config.exs](apps/rebuildremoved/config/config.exs)
+- If the server is not running on `localhost`, set the `GO_SERVER_URL` environment variable (e.g. `https://go-server:8154/go`)
+
+## Deployment
+
+options:
+
+- contribute your own
+- use the simple `Dockerfile` based on the Elixir image
+- build `mix deps.get && mix compiled` and start via `mix run --no-halt`
 
 ## TODO
 
