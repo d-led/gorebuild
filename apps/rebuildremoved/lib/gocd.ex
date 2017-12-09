@@ -17,13 +17,11 @@ defmodule Gocd do
 
 
     defp with_status(job_config = %{pipeline: pipeline}) do
-        # todo: ensure, only if not running already and not failed
         job_config
-        |> Map.put(:status, status_of(pipeline))
+        |> Map.put(:passed, passed(pipeline))
     end
 
-
-    defp trigger_if_necessary(job_config = %{paths: paths}) do
+    defp trigger_if_necessary(job_config = %{paths: paths, passed: true}) do
         case artifacts_of_latest_run(job_config) do
             nil -> false
             artifacts -> first_mising = paths
@@ -32,6 +30,12 @@ defmodule Gocd do
                          first_mising |> trigger_if_missing(job_config)
         end
     end
+
+    # else, don't trigger
+    defp trigger_if_necessary(%{pipeline: pipeline}) do
+        Logger.info "not triggering #{pipeline}, as it is not green"
+    end
+
 
     defp trigger_if_missing(nil, _), do: true #nothing to do
 
@@ -53,13 +57,17 @@ defmodule Gocd do
         end
     end
 
-    #{:error, %Tesla.Error{message: "ada
-
-    defp status_of(pipeline) do
-        case get("/api/pipelines/#{pipeline}/status") do
-            { :ok, %Tesla.Env{body: status} } -> status
+    defp passed(pipeline) do
+        case get("/api/pipelines/#{pipeline}/history") do
+            { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
             { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}: #{message}"); %{}
         end
+    end
+
+    defp last_run_passed( %{"pipelines"=>[last_pipeline|_rest]} ) do
+        %{"stages"=>stages} = last_pipeline
+        stages
+        |> Enum.all?(fn stage -> Map.get(stage, "result") == "Passed" end)
     end
 
     def url, do: @gocd.url

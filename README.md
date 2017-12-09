@@ -1,5 +1,8 @@
-# Gorebuild
+# GoRebuild
 
+Service for triggering GoCD pipelines on demand
+
+contributions & other problem fixes welcome!
 
 ## Problem
 
@@ -16,21 +19,25 @@ dependency might get garbage collected, and the downstream one fails when trying
 Polling for the presence of pre-defined artifacts, and triggering pipelines when the artifact that should not have
 been deleted has been deleted nonetheless.
 
-TODO: The pipeline should not be triggered for previously failed or currently running pipelines
+The pipeline is not triggered for previously failed or currently running pipelines
 
 ![](docs/img/triggering.png)
+
+## Configuration
+
+- see [apps/rebuildremoved/config/config.exs](apps/rebuildremoved/config/config.exs)
+
+## TODO
+
+- authentication
 
 ## Commentary
 
 While the solution is not a systematically optimal one (if keeping N last artifacts is a viable feature, it should be part of GoCD), currently, it is a most pragmatic one.
 
-### Other Links
+### Links to Problem Descriptions
 
-
-https://github.com/gocd/gocd/issues/4022
-
-https://github.com/gocd/gocd/issues/410
-
-https://github.com/gocd/gocd/issues/1207
-
-https://groups.google.com/forum/m/#!topic/go-cd/QArd6yLwhl4
+- gocd/gocd/#4022
+- gocd/gocd/#410
+- gocd/gocd/#1207
+- https://groups.google.com/forum/m/#!topic/go-cd/QArd6yLwhl4
