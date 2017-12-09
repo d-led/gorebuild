@@ -9,11 +9,16 @@ defmodule Gocd do
     plug Tesla.Middleware.Tuples
     plug Tesla.Middleware.JSON
 
+    # API
+
     def trigger_if_artifacts_missing(job_config) do
         job_config
         |> with_status()
         |> trigger_if_necessary()
     end
+
+
+    # implementation
 
 
     defp with_status(job_config = %{pipeline: pipeline}) do
@@ -31,12 +36,13 @@ defmodule Gocd do
         end
     end
 
-    # else, don't trigger
+    # don't trigger if not green
     defp trigger_if_necessary(%{pipeline: pipeline}) do
         Logger.info "not triggering #{pipeline}, as it is not green"
     end
 
 
+    # if no artifacts returned from artifacts_of_latest_run
     defp trigger_if_missing(nil, _), do: true #nothing to do
 
     defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
@@ -48,7 +54,6 @@ defmodule Gocd do
         end
     end
 
-    # implementation
 
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
         case get("/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
@@ -60,7 +65,7 @@ defmodule Gocd do
     defp passed(pipeline) do
         case get("/api/pipelines/#{pipeline}/history") do
             { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
-            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}: #{message}"); %{}
+            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}: #{message}"); false
         end
     end
 
