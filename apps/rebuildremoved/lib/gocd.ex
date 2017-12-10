@@ -38,7 +38,7 @@ defmodule Gocd do
 
     # don't trigger if not green
     defp trigger_if_necessary(%{pipeline: pipeline}) do
-        Logger.info "not triggering #{pipeline}, as it is not green"
+        Logger.info "not triggering #{pipeline}, as the last run of the pipeine is not green"
     end
 
 
@@ -84,7 +84,6 @@ defmodule Gocd do
 
     def start do
         Logger.info "Starting for #{@gocd.url}"
-        Logger.info "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
         if @gocd.password != nil && @gocd.user != nil do
             Logger.info "Authenticating as user: #{@gocd.user}"
         end
