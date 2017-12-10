@@ -4,10 +4,11 @@ config :rebuildremoved,
     artifacts: [
         %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
             paths: [
-                "foo",
+                "foo/bar",
+                "foo/bar/start.sh"
             ]
         },
         %{pipeline: "consumer", stage: "defaultStage", job: "DefaultJob",
-            paths: [ "bla" ]
+            paths: [ "bla/blup" ]
         }
     ]

@@ -13,15 +13,16 @@ use Mix.Config
 config :rebuildremoved,
     delay_ms: System.get_env("GO_DELAY") || 10*1000,
     artifacts: [
-        %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
-            paths: [
-                "foo/bar",
-                "foo/bar/start.sh"
-            ]
-        },
-        %{pipeline: "consumer", stage: "defaultStage", job: "DefaultJob",
-            paths: [ "bla/blup" ]
-        }
+        # e.g.:
+        # %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
+        #     paths: [
+        #         "foo/bar",
+        #         "foo/bar/start.sh"
+        #     ]
+        # },
+        # %{pipeline: "consumer", stage: "defaultStage", job: "DefaultJob",
+        #     paths: [ "bla/blup" ]
+        # }
     ],
     gocd: %{
         url: System.get_env("GO_SERVER_URL") || "https://localhost:8154/go",
