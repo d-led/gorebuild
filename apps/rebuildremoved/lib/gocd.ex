@@ -58,7 +58,7 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#get-all-artifacts
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
-        case get("/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
+        case get(client(), "/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
           { :ok, %Tesla.Env{body: files} } -> files
           { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}/#{stage}/#{job}: #{message}"); nil
         end
@@ -66,7 +66,7 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#get-pipeline-history
     defp passed(pipeline) do
-        case get("/api/pipelines/#{pipeline}/history") do
+        case get(client(), "/api/pipelines/#{pipeline}/history") do
             { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
             { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}: #{message}"); false
         end
@@ -78,5 +78,27 @@ defmodule Gocd do
         |> Enum.all?(fn stage -> Map.get(stage, "result") == "Passed" end)
     end
 
-    def url, do: @gocd.url
+    defp last_run_passed(response) do
+        Logger.warn "Unexpected response: #{String.slice(response, 0, 15)}..."
+    end
+
+    def start do
+        Logger.info "Starting for #{@gocd.url}"
+        Logger.info "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
+        if @gocd.password != nil && @gocd.user != nil do
+            Logger.info "Authenticating as user: #{@gocd.user}"
+        end
+    end
+
+    # dynamic user & pass
+    defp client() do
+        if @gocd.password != nil && @gocd.user != nil do
+            Tesla.build_client [
+              {Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}
+            ]
+        else
+            Tesla.build_client []
+        end
+    end
+
 end

@@ -9,7 +9,7 @@ defmodule Rebuildremoved.Supervisor do
   end
 
   def init(:ok) do
-    Logger.info "starting for #{Gocd.url}"
+    Gocd.start()
 
     children = Application.get_env(:rebuildremoved, :artifacts)
       |> Enum.with_index

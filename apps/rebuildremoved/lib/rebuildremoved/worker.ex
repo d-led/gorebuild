@@ -3,8 +3,6 @@ defmodule Rebuildremoved.Worker do
   require Logger
   require Gocd
 
-  @delay_ms Application.get_env(:rebuildremoved, :delay_ms) || 30*1000
-
   # GenServer init
 
   def start_link(job_config) do
@@ -31,5 +29,9 @@ defmodule Rebuildremoved.Worker do
     schedule_next()
   end
 
-  defp schedule_next(delay_ms \\ @delay_ms), do: Process.send_after(self(), :check, delay_ms)
+  defp schedule_next(delay_ms \\ delay()), do: Process.send_after(self(), :check, delay_ms)
+
+  defp delay(), do: delay(Application.get_env(:rebuildremoved, :delay_ms))
+  defp delay(delay_ms) when is_binary(delay_ms), do: delay_ms |> String.to_integer
+  defp delay(delay_ms), do: delay_ms
 end

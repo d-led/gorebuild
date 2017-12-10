@@ -24,3 +24,4 @@ erl_crash.dump
 !/test/godata/config/
 /test/godata/config/**
 !/test/godata/config/cruise-config.xml
+ttb_last_config
