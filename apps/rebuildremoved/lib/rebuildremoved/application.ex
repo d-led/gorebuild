@@ -9,6 +9,7 @@ defmodule Rebuildremoved.Supervisor do
   end
 
   def init(:ok) do
+    Process.register self(), __MODULE__
     Gocd.start()
     Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
 

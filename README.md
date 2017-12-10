@@ -50,6 +50,10 @@ options:
 
 While the solution is not a systematically optimal one (if keeping N last artifacts is a viable feature, it should be part of GoCD), currently, it is a most pragmatic one.
 
+For each pipeline, a separate process is started under the supervisor. Here, for 2 pipelines:
+
+![](docs/img/observer.png)
+
 ### Links to Problem Descriptions
 
 - https://github.com/gocd/gocd/issues/4022
