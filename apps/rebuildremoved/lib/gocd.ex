@@ -50,7 +50,7 @@ defmodule Gocd do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
 
         case post("/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
-            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}/#{stage}/#{job}: #{message}"); false
+            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); false
             _ -> true
         end
     end
@@ -60,7 +60,7 @@ defmodule Gocd do
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
         case get(client(), "/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
           { :ok, %Tesla.Env{body: files} } -> files
-          { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}/#{stage}/#{job}: #{message}"); nil
+          { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); nil
         end
     end
 
@@ -68,7 +68,7 @@ defmodule Gocd do
     defp passed(pipeline) do
         case get(client(), "/api/pipelines/#{pipeline}/history") do
             { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
-            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on #{pipeline}: #{message}"); false
+            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on pipeline '#{pipeline}': #{message}"); false
         end
     end
 
@@ -83,7 +83,7 @@ defmodule Gocd do
     end
 
     def start do
-        Logger.info "Starting for #{@gocd.url}"
+        Logger.warn "Starting to poll #{@gocd.url}"
         if @gocd.password != nil && @gocd.user != nil do
             Logger.info "Authenticating as user: #{@gocd.user}"
         end

@@ -10,7 +10,7 @@ defmodule Rebuildremoved.Supervisor do
 
   def init(:ok) do
     Gocd.start()
-    Logger.info "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
+    Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
 
     children = Application.get_env(:rebuildremoved, :artifacts)
       |> Enum.with_index
@@ -32,7 +32,6 @@ defmodule Rebuildremoved.Application do
   @moduledoc false
 
   use Application
-  require Logger
 
   def start(_type, _args) do
 
