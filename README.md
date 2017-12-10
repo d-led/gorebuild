@@ -27,6 +27,8 @@ The pipeline is not triggered for previously failed or currently running pipelin
 
 - see [apps/rebuildremoved/config/config.exs](apps/rebuildremoved/config/config.exs)
 - If the server is not running on `localhost`, set the `GO_SERVER_URL` environment variable (e.g. `https://go-server:8154/go`)
+- For basic authentication, set `GO_USERNAME` and `GO_PASSWORD` environment variables
+- The default delay (in milliseconds) is overriden via the `GO_DELAY` environment variable
 
 ## Deployment
 
@@ -35,10 +37,6 @@ options:
 - contribute your own
 - use the simple `Dockerfile` based on the Elixir image
 - build `mix deps.get && mix compiled` and start via `mix run --no-halt`
-
-## TODO
-
-- authentication
 
 ## Commentary
 
