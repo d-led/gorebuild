@@ -51,7 +51,8 @@ defmodule Gocd do
 
         case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
             { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); false
-            _ -> true
+            { :ok, %Tesla.Env{ body: body } } -> Logger.warn("Pipeline '#{pipeline}': #{String.trim(body)}"); false
+            { status, _} -> Logger.warn("Pipeline '#{pipeline}': #{inspect(status)}"); true
         end
     end
 
