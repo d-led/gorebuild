@@ -50,8 +50,8 @@ defmodule Gocd do
         end
     end
 
-    # no missing artifact otherwise
-    defp missing_artifact?(job_config = %{status: %{should_run: false}}), do: job_config |> Map.put(:missing_artifact, nil)
+    # must have been an error upstream
+    defp missing_artifact?(job_config = %{}), do: job_config |> Map.put(:missing_artifact, nil)
 
 
 
