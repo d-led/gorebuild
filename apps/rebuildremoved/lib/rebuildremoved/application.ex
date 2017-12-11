@@ -11,7 +11,7 @@ defmodule Rebuildremoved.Supervisor do
   def init(:ok) do
     Process.register self(), __MODULE__
     Gocd.start()
-    Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms"
+    Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms + random(10%)"
 
     children = Application.get_env(:rebuildremoved, :artifacts)
       |> Enum.with_index
