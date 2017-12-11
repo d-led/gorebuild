@@ -11,9 +11,18 @@ defmodule Gocd do
 
     # API
 
+    def start do
+        Logger.warn "Starting to poll #{@gocd.url}"
+        if authentication_provided?() do
+            Logger.warn "Authenticating as user: #{@gocd.user}"
+        end
+    end
+
+
     def trigger_if_artifacts_missing(job_config) do
         job_config
         |> with_status()
+        |> missing_artifact?()
         |> trigger_if_necessary()
     end
 
@@ -26,13 +35,34 @@ defmodule Gocd do
         |> Map.put(:status, status_of(pipeline))
     end
 
-    defp trigger_if_necessary(job_config = %{paths: paths, status: %{should_run: true}}) do
+
+    defp missing_artifact?(job_config = %{paths: paths, status: %{should_run: true}}) do
         case artifacts_of_latest_run(job_config) do
-            nil -> false
-            artifacts -> paths
-                         |> Enum.find(&(!GoCDartifacts.contain(artifacts, &1)))
-                         |> trigger_if_missing(job_config)
+            nil ->
+                job_config |> Map.put(:missing_artifact, nil)
+
+            artifacts
+                -> job_config
+                    |> Map.put(:missing_artifact,
+                        paths |> Enum.find(&(!GoCDartifacts.contain(artifacts, &1)))
+                    )
+
         end
+    end
+
+    # no missing artifact otherwise
+    defp missing_artifact?(job_config = %{status: %{should_run: false}}), do: job_config |> Map.put(:missing_artifact, nil)
+
+
+
+    defp trigger_if_necessary(%{missing_artifact: nil}), do: true #nothing to do
+
+    defp trigger_if_necessary(job_config = %{missing_artifact: artifact, status: %{should_run: true, can_run: true}}) do
+        artifact |> trigger(job_config)
+    end
+
+    defp trigger_if_necessary(%{pipeline: pipeline, status: %{should_run: true, can_run: false}}) do
+        Logger.warn "not triggering #{pipeline}, as it currently cannot be scheduled"
     end
 
     # don't trigger if not green
@@ -41,11 +71,11 @@ defmodule Gocd do
     end
 
 
-    # if no artifacts returned from artifacts_of_latest_run
-    defp trigger_if_missing(nil, _), do: true #nothing to do
+    # GoCD API calls
+
 
     # https://api.gocd.org/current/#scheduling-pipelines
-    defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
+    defp trigger(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline #{@gocd.url}/tab/pipeline/history/#{pipeline}"
 
         case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
@@ -56,6 +86,7 @@ defmodule Gocd do
     end
 
 
+
     # https://api.gocd.org/current/#get-all-artifacts
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
         case get(client(), "/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
@@ -63,6 +94,7 @@ defmodule Gocd do
           { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); nil
         end
     end
+
 
     # https://api.gocd.org/current/#get-pipeline-history
     defp status_of(pipeline) do
@@ -82,6 +114,7 @@ defmodule Gocd do
         end
     end
 
+
     defp last_run( %{"pipelines"=>[_last_pipeline = %{"stages"=>stages, "can_run"=>can_run} | _rest]} ) do
         %{
             should_run: stages |> Enum.all?(fn stage -> Map.get(stage, "result") == "Passed" end),
@@ -94,14 +127,11 @@ defmodule Gocd do
         %{can_run: false}
     end
 
-    def start do
-        Logger.warn "Starting to poll #{@gocd.url}"
-        if authentication_provided?() do
-            Logger.warn "Authenticating as user: #{@gocd.user}"
-        end
-    end
 
-    # dynamic user & pass
+
+    # REST client configuration
+
+
     defp client() do
         if authentication_provided?() do
             Tesla.build_client [
