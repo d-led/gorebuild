@@ -29,10 +29,9 @@ defmodule Gocd do
     defp trigger_if_necessary(job_config = %{paths: paths, passed: true}) do
         case artifacts_of_latest_run(job_config) do
             nil -> false
-            artifacts -> first_mising = paths
+            artifacts -> paths
                          |> Enum.find(&(!GoCDartifacts.contain(artifacts, &1)))
-
-                         first_mising |> trigger_if_missing(job_config)
+                         |> trigger_if_missing(job_config)
         end
     end
 
