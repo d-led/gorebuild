@@ -29,7 +29,10 @@ defmodule Rebuildremoved.Worker do
     schedule_next()
   end
 
-  defp schedule_next(delay_ms \\ delay()), do: Process.send_after(self(), :check, delay_ms)
+  # delay with max 10% random extra time
+  defp schedule_next(delay_ms \\ delay()) do
+    Process.send_after(self(), :check, round(delay_ms + 0.1*:rand.uniform(delay_ms)))
+  end
 
   defp delay(), do: delay(Application.get_env(:rebuildremoved, :delay_ms))
   defp delay(delay_ms) when is_binary(delay_ms), do: delay_ms |> String.to_integer
