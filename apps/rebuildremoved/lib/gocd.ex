@@ -38,7 +38,7 @@ defmodule Gocd do
 
     # don't trigger if not green
     defp trigger_if_necessary(%{pipeline: pipeline}) do
-        Logger.info "not triggering #{pipeline}, as the last run of the pipeine is not green"
+        Logger.warn "not triggering #{pipeline}, as the last run of the pipeine is not green"
     end
 
 
