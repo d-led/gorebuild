@@ -23,10 +23,10 @@ defmodule Gocd do
 
     defp with_status(job_config = %{pipeline: pipeline}) do
         job_config
-        |> Map.put(:passed, passed(pipeline))
+        |> Map.put(:status, status_of(pipeline))
     end
 
-    defp trigger_if_necessary(job_config = %{paths: paths, passed: true}) do
+    defp trigger_if_necessary(job_config = %{paths: paths, status: %{should_run: true}}) do
         case artifacts_of_latest_run(job_config) do
             nil -> false
             artifacts -> paths
@@ -65,25 +65,33 @@ defmodule Gocd do
     end
 
     # https://api.gocd.org/current/#get-pipeline-history
-    defp passed(pipeline) do
+    defp status_of(pipeline) do
         try do
             case get(client(), "/api/pipelines/#{pipeline}/history") do
-                { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
-                { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on pipeline '#{pipeline}': #{message}"); false
+                { :ok, %Tesla.Env{body: status} } ->
+                    status |> last_run()
+
+                { :error, %Tesla.Error{message: message} } ->
+                    Logger.error("Http error on pipeline '#{pipeline}': #{message}")
+                    %{can_run: false}
             end
         rescue
-            e -> Logger.error("Error querying pipeline #{pipeline}: #{inspect(e)}"); false
+            e ->
+                Logger.error("Error querying pipeline #{pipeline}: #{inspect(e)}")
+                %{can_run: false}
         end
     end
 
-    defp last_run_passed( %{"pipelines"=>[last_pipeline|_rest]} ) do
-        %{"stages"=>stages} = last_pipeline
-        stages
-        |> Enum.all?(fn stage -> Map.get(stage, "result") == "Passed" end)
+    defp last_run( %{"pipelines"=>[_last_pipeline = %{"stages"=>stages, "can_run"=>can_run} | _rest]} ) do
+        %{
+            should_run: stages |> Enum.all?(fn stage -> Map.get(stage, "result") == "Passed" end),
+            can_run: can_run
+        }
     end
 
-    defp last_run_passed(response) do
+    defp last_run(response) when is_binary(response) do
         Logger.warn "Unexpected response: #{String.slice(response, 0, 15)}..."
+        %{can_run: false}
     end
 
     def start do
