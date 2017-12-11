@@ -46,7 +46,7 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#scheduling-pipelines
     defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
-        Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
+        Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline #{@gocd.url}/tab/pipeline/history/#{pipeline}"
 
         case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
             { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); false
@@ -88,14 +88,14 @@ defmodule Gocd do
 
     def start do
         Logger.warn "Starting to poll #{@gocd.url}"
-        if authentication_provided? do
+        if authentication_provided?() do
             Logger.warn "Authenticating as user: #{@gocd.user}"
         end
     end
 
     # dynamic user & pass
     defp client() do
-        if authentication_provided? do
+        if authentication_provided?() do
             Tesla.build_client [
               {Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}
             ]
