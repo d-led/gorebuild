@@ -49,7 +49,7 @@ defmodule Gocd do
     defp trigger_if_missing(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline"
 
-        case post("/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
+        case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
             { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); false
             _ -> true
         end
