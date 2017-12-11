@@ -85,20 +85,24 @@ defmodule Gocd do
 
     def start do
         Logger.warn "Starting to poll #{@gocd.url}"
-        if @gocd.password != nil && @gocd.user != nil do
+        if authentication_provided? do
             Logger.warn "Authenticating as user: #{@gocd.user}"
         end
     end
 
     # dynamic user & pass
     defp client() do
-        if @gocd.password != nil && @gocd.user != nil do
+        if authentication_provided? do
             Tesla.build_client [
               {Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}
             ]
         else
             Tesla.build_client []
         end
+    end
+
+    defp authentication_provided? do
+        @gocd.password != nil && @gocd.user != nil
     end
 
 end
