@@ -66,9 +66,13 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#get-pipeline-history
     defp passed(pipeline) do
-        case get(client(), "/api/pipelines/#{pipeline}/history") do
-            { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
-            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on pipeline '#{pipeline}': #{message}"); false
+        try do
+            case get(client(), "/api/pipelines/#{pipeline}/history") do
+                { :ok, %Tesla.Env{body: status} } -> status |> last_run_passed()
+                { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on pipeline '#{pipeline}': #{message}"); false
+            end
+        rescue
+            e -> Logger.error("Error querying pipeline #{pipeline}: #{inspect(e)}"); false
         end
     end
 
