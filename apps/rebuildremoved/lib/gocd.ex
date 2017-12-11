@@ -85,7 +85,7 @@ defmodule Gocd do
     def start do
         Logger.warn "Starting to poll #{@gocd.url}"
         if @gocd.password != nil && @gocd.user != nil do
-            Logger.info "Authenticating as user: #{@gocd.user}"
+            Logger.warn "Authenticating as user: #{@gocd.user}"
         end
     end
 
