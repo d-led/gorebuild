@@ -4,6 +4,8 @@ Service for triggering GoCD pipelines on demand, implemented in Elixir
 
 contributions & other problem fixes welcome!
 
+[![Build Status](https://travis-ci.org/d-led/gorebuild.svg?branch=master)](https://travis-ci.org/d-led/gorebuild)
+
 ## Problem
 
 - GoCD garbage collection can remove artifacts to not overfill the artifacts repository.
