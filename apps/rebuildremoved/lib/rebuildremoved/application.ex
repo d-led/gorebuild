@@ -1,35 +1,37 @@
 defmodule Rebuildremoved.Supervisor do
   @moduledoc false
 
-  use Supervisor
+  use DynamicSupervisor
   require Logger
 
-  def start_link(opts) do
-    Supervisor.start_link(__MODULE__, :ok, opts)
+  def start_link(_) do
+    DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    Process.register self(), __MODULE__
     Gocd.start()
+
     Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms + random(10%)"
 
-    children = Application.get_env(:rebuildremoved, :artifacts)
-      |> Enum.with_index
-      |> Enum.map(fn {job_config, id} ->
-        Supervisor.child_spec({Rebuildremoved.Worker, job_config}, id: String.to_atom("worker#{id}"), restart: :transient)
-      end)
+    DynamicSupervisor.init(strategy: :one_for_one)
+  end
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Rebuildremoved.Supervisor]
+  def start_children do
+    Application.get_env(:rebuildremoved, :artifacts)
+    |> Enum.with_index
+    |> Enum.map(fn {job_config, id} ->
+        spec = Supervisor.child_spec(
+          {Rebuildremoved.Worker, job_config},
+          id: String.to_atom("worker#{id}"),
+          restart: :transient
+        )
 
-    Supervisor.init(children, opts)
+        {:ok, _pid} = DynamicSupervisor.start_child(__MODULE__, spec)
+    end)
   end
 end
 
 defmodule Rebuildremoved.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
@@ -40,9 +42,11 @@ defmodule Rebuildremoved.Application do
       Rebuildremoved.Supervisor
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Rebuildremoved.App]
-    Supervisor.start_link(children, opts)
+    ret = Supervisor.start_link(children, opts)
+
+      Rebuildremoved.Supervisor.start_children
+
+    ret
   end
 end
