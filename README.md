@@ -43,7 +43,7 @@ MIX_ENV=example GO_DELAY=1000 ./start.sh
 options:
 
 - contribute your own
-- use the simple `Dockerfile` based on the Elixir image
+- use the simple `Dockerfile` based on the Elixir image ([Dockerfile.gorebuild](Dockerfile.gorebuild))
 - build `mix deps.get && mix compiled` and start via `mix run --no-halt`
 
 ## Commentary
@@ -53,6 +53,11 @@ While the solution is not a systematically optimal one (if keeping N last artifa
 For each pipeline, a separate process is started under the supervisor. Here, for 2 pipelines:
 
 ![](docs/img/observer.png)
+
+## Development
+
+- Starting a GoCD server, agent and gorebuild: `docker-compose up --build`
+- Simulate a garbage collection via the script [simulate_gc.sh](simulate_gc.sh)
 
 ### Links to Problem Descriptions
 

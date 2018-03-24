@@ -1,7 +1,7 @@
 version: "2"
 services:
   go-server:
-    image: gocd/gocd-server:v17.12.0
+    image: gocd/gocd-server:v18.2.0
     ports:
       - '8153:8153'
       - '8154:8154'
@@ -10,7 +10,7 @@ services:
       - ./test/godata/artifacts:/godata/artifacts
 
   go-agent:
-    image: gocd/gocd-agent-alpine-3.6:v17.12.0
+    image: gocd/gocd-agent-alpine-3.6:v18.2.0
     links:
       - go-server
     environment:
