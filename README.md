@@ -46,7 +46,7 @@ options:
 
 - contribute your own
 - use the simple `Dockerfile` based on the Elixir image ([Dockerfile.gorebuild](Dockerfile.gorebuild))
-- build `mix deps.get && mix compiled` and start via `mix run --no-halt`
+- build `mix deps.get && mix compile` and start via `mix run --no-halt`
 
 ## Commentary
 
