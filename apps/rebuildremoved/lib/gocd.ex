@@ -83,7 +83,7 @@ defmodule Gocd do
     defp trigger(artifact, %{pipeline: pipeline, stage: stage, job: job}) do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline #{@gocd.url}/tab/pipeline/history/#{pipeline}"
 
-        case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
+        case post(client(true), "/api/pipelines/#{pipeline}/schedule", %{}) do
             { :ok, %Tesla.Env{ body: body } } -> Logger.warn("Pipeline '#{pipeline}': #{String.trim(body)}"); false
             { status, _} -> Logger.warn("Pipeline '#{pipeline}': #{inspect(status)}"); true
         end
@@ -146,15 +146,20 @@ defmodule Gocd do
     # REST client configuration
 
 
-    defp client() do
+    defp client(confirm \\ false) do
         if authentication_provided?() do
-            Tesla.build_client [
-              {Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}
-            ]
+            Tesla.build_client(
+                [{Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}]
+                ++
+                headers(confirm)
+            )
         else
-            Tesla.build_client []
+            Tesla.build_client(headers(confirm))
         end
     end
+
+    defp headers(false), do: []
+    defp headers(true), do: [{Tesla.Middleware.Headers, [{"Confirm", "true" }]}]
 
     defp authentication_provided? do
         @gocd.password != nil && @gocd.user != nil
