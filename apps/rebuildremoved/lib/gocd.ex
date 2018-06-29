@@ -6,8 +6,7 @@ defmodule Gocd do
 
 
     plug Tesla.Middleware.BaseUrl, @gocd.url
-    plug Tesla.Middleware.Tuples
-    plug Tesla.Middleware.JSON
+    plug Tesla.Middleware.JSON, engine: Poison
 
     # API
 
@@ -70,6 +69,12 @@ defmodule Gocd do
         Logger.warn "not triggering #{pipeline}, as the last run of the pipeine is not green"
     end
 
+    defp status_of(pipeline) do
+        case schedulable_and_unpaused?(pipeline) do
+            %{can_run: true} -> last_run_ok?(pipeline)
+            _ -> %{can_run: false}
+        end
+    end
 
     # GoCD API calls
 
@@ -79,7 +84,6 @@ defmodule Gocd do
         Logger.warn "Artifact #{artifact} missing from #{pipeline}/#{stage}/#{job} -> triggering the pipeline #{@gocd.url}/tab/pipeline/history/#{pipeline}"
 
         case post(client(), "/api/pipelines/#{pipeline}/schedule",%{},headers: %{"Confirm" => "true"}) do
-            { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); false
             { :ok, %Tesla.Env{ body: body } } -> Logger.warn("Pipeline '#{pipeline}': #{String.trim(body)}"); false
             { status, _} -> Logger.warn("Pipeline '#{pipeline}': #{inspect(status)}"); true
         end
@@ -91,29 +95,40 @@ defmodule Gocd do
     defp artifacts_of_latest_run(%{pipeline: pipeline, stage: stage, job: job}) do
         case get(client(), "/files"<>"/#{pipeline}"<>"/Latest"<>"/#{stage}"<>"/Latest"<>"/#{job}"<>".json") do
           { :ok, %Tesla.Env{body: files} } -> files
-          { :error, %Tesla.Error{message: message} } -> Logger.error("Http error on job #{pipeline}/#{stage}/#{job}: #{message}"); nil
         end
     end
 
-
     # https://api.gocd.org/current/#get-pipeline-history
-    defp status_of(pipeline) do
+    defp last_run_ok?(pipeline) do
         try do
             case get(client(), "/api/pipelines/#{pipeline}/history") do
                 { :ok, %Tesla.Env{body: status} } ->
                     status |> last_run()
-
-                { :error, %Tesla.Error{message: message} } ->
-                    Logger.error("Http error on pipeline '#{pipeline}': #{message}")
-                    %{can_run: false}
             end
         rescue
             e ->
-                Logger.error("Error querying pipeline #{pipeline}: #{inspect(e)}")
+                Logger.error("last_run_ok?: Error querying pipeline #{pipeline}: #{inspect(e)}")
                 %{can_run: false}
         end
     end
 
+    # https://api.gocd.org/current/#get-pipeline-status
+    defp schedulable_and_unpaused?(pipeline) do
+        try do
+            case get(client(), "/api/pipelines/#{pipeline}/status") do
+                { :ok, %Tesla.Env{body: %{"schedulable"=>true, "paused"=>false} } } ->
+                    %{can_run: true}
+
+                { :ok, %Tesla.Env{body: %{"schedulable"=>schedulable, "paused"=>paused} } } ->
+                    Logger.info("Skipping pipeline #{pipeline}, as it's schedulable: #{schedulable}, paused: #{paused}")
+                    %{can_run: false}
+            end
+        rescue
+            e ->
+                Logger.error("schedulable_and_unpaused?: Error querying pipeline #{pipeline}: #{inspect(e)}")
+                %{can_run: false}
+        end
+    end
 
     defp last_run( %{"pipelines"=>[_last_pipeline = %{"stages"=>stages, "can_run"=>can_run} | _rest]} ) do
         %{
@@ -126,7 +141,6 @@ defmodule Gocd do
         Logger.warn "Unexpected response: #{String.slice(response, 0, 15)}..."
         %{can_run: false}
     end
-
 
 
     # REST client configuration

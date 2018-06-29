@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="105">
+<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="108">
   <server artifactsdir="artifacts" agentAutoRegisterKey="123456789abcdef" webhookSecret="12f2e565-b3aa-4e1b-896f-ff98b5abbfb5" commandRepositoryLocation="default" serverId="709cea85-43f1-4e60-9d10-7e5dfeea0cce" tokenGenerationKey="a9a9e550-68ff-4a17-9e40-73e74f8c72b4" />
   <pipelines group="defaultGroup">
     <pipeline name="test">
@@ -16,8 +16,8 @@
               </exec>
             </tasks>
             <artifacts>
-              <artifact src="config" />
-              <artifact src="start.sh" dest="foo/bar/" />
+              <artifact type="build" src="config" />
+              <artifact type="build" src="start.sh" dest="foo/bar/" />
             </artifacts>
           </job>
         </jobs>
@@ -31,13 +31,13 @@
         <jobs>
           <job name="defaultJob">
             <tasks>
-              <fetchartifact srcfile="foo/bar/start.sh" pipeline="test" stage="defaultStage" job="defaultJob">
+              <fetchartifact origin="gocd" srcfile="foo/bar/start.sh" pipeline="test" stage="defaultStage" job="defaultJob">
                 <runif status="passed" />
               </fetchartifact>
               <exec command="ls" />
             </tasks>
             <artifacts>
-              <artifact src="start.sh" dest="bla/blup" />
+              <artifact type="build" src="start.sh" dest="bla/blup" />
             </artifacts>
           </job>
         </jobs>
@@ -45,5 +45,7 @@
     </pipeline>
   </pipelines>
   <agents>
+    <agent hostname="244c1a008069" ipaddress="172.18.0.3" uuid="422ea9d6-84c5-4a27-90e0-580d652a74ee" />
+    <agent hostname="68bf2631f523" ipaddress="172.18.0.3" uuid="792c8bb8-a525-48d4-86a8-4e1ea908755d" />
   </agents>
 </cruise>
