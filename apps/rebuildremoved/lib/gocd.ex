@@ -100,14 +100,19 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#get-pipeline-history
     defp last_run_ok?(pipeline) do
+        context = "last_run_ok?: Error querying pipeline #{pipeline}"
         try do
             case get(client(), "/api/pipelines/#{pipeline}/history") do
                 { :ok, %Tesla.Env{body: status} } ->
                     status |> last_run()
+
+                {:error, reason} ->
+                    show_error(context, reason)
+                    %{can_run: false}
             end
         rescue
             e ->
-                show_error("last_run_ok?: Error querying pipeline #{pipeline}", e)
+                show_error(context, e)
                 %{can_run: false}
         end
     end
@@ -121,6 +126,8 @@ defmodule Gocd do
 
     # https://api.gocd.org/current/#get-pipeline-status
     defp schedulable_and_unpaused?(pipeline) do
+        context = "schedulable_and_unpaused?: Error querying pipeline #{pipeline}"
+
         try do
             case get(client(), "/api/pipelines/#{pipeline}/status") do
                 { :ok, %Tesla.Env{body: %{"schedulable"=>true, "paused"=>false} } } ->
@@ -129,10 +136,17 @@ defmodule Gocd do
                 { :ok, %Tesla.Env{body: %{"schedulable"=>schedulable, "paused"=>paused} } } ->
                     Logger.info("Skipping pipeline #{pipeline}, as it's schedulable: #{schedulable}, paused: #{paused}")
                     %{can_run: false}
+
+                { :ok, %Tesla.Env{body: body} } ->
+                    show_error(context, body) # perhaps, some html
+                    %{can_run: false}
+
+                {:error, reason} ->
+                    show_error(context, reason)
             end
         rescue
             e ->
-                show_error("schedulable_and_unpaused?: Error querying pipeline #{pipeline}", e)
+                show_error(context , e)
                 %{can_run: false}
         end
     end
