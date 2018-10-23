@@ -107,8 +107,15 @@ defmodule Gocd do
             end
         rescue
             e ->
-                Logger.error("last_run_ok?: Error querying pipeline #{pipeline}: #{inspect(e)}")
+                show_error("last_run_ok?: Error querying pipeline #{pipeline}", e)
                 %{can_run: false}
+        end
+    end
+
+    defp show_error(context, e) do
+        case e do
+            %err{} -> Logger.error("#{context}: #{inspect(err)}")
+            e-> Logger.error("#{context}: #{inspect(e)}")
         end
     end
 
@@ -125,7 +132,7 @@ defmodule Gocd do
             end
         rescue
             e ->
-                Logger.error("schedulable_and_unpaused?: Error querying pipeline #{pipeline}: #{inspect(e)}")
+                show_error("schedulable_and_unpaused?: Error querying pipeline #{pipeline}", e)
                 %{can_run: false}
         end
     end
