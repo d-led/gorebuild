@@ -28,7 +28,7 @@ The pipeline is not triggered for previously failed or currently running pipelin
 ## Configuration
 
 - see [apps/rebuildremoved/config/config.exs](apps/rebuildremoved/config/config.exs)
-- If the server is not running on `localhost`, set the `GO_SERVER_URL` environment variable (e.g. `https://go-server:8154/go`)
+- If the server is not running on `localhost`, set the `GO_SERVER_URL` environment variable (e.g. `https://go-server:8154/go`), before `mix clean compile`, as standard configuration is evaluated at [compile time](https://www.amberbit.com/blog/2018/9/27/elixir-runtime-vs-compile-time-configuration/)
 - For basic authentication, set `GO_USERNAME` and `GO_PASSWORD` environment variables
 - The default delay (in milliseconds) is overriden via the `GO_DELAY` environment variable
 - To provide the service with a list of artifacts to watch, copy an environment-specific Mix config file into `apps/buildremoved/config/`, and use a `MIX_ENV` variable to provide the config override filename, where the value corresponds to the filename (without extension) of the config file.
