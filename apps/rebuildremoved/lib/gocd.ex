@@ -109,6 +109,10 @@ defmodule Gocd do
                 {:error, reason} ->
                     show_error(context, reason)
                     %{can_run: false}
+
+                e ->
+                    show_error(context, e)
+                    %{can_run: false}
             end
         rescue
             e ->
@@ -120,7 +124,7 @@ defmodule Gocd do
     defp show_error(context, e) do
         case e do
             %err{} -> Logger.error("#{context}: #{inspect(err)}")
-            e-> Logger.error("#{context}: #{inspect(e)}")
+            err-> Logger.error("#{context}: #{inspect(err) |> String.slice(0..160)}...")
         end
     end
 
@@ -143,6 +147,9 @@ defmodule Gocd do
 
                 {:error, reason} ->
                     show_error(context, reason)
+
+                e ->
+                    show_error(context, e)
             end
         rescue
             e ->
@@ -158,11 +165,20 @@ defmodule Gocd do
         }
     end
 
-    defp last_run(response) when is_binary(response) do
-        Logger.warn "Unexpected response: #{String.slice(response, 0, 15)}..."
+    defp last_run( %{"pipelines"=>[]} ) do
+        Logger.warn "Pipeline seems to not have run yet..."
         %{can_run: false}
     end
 
+    defp last_run(response) when is_binary(response) do
+        Logger.warn "Unexpected response: #{String.slice(response, 0, 180)}..."
+        %{can_run: false}
+    end
+
+    defp last_run(response) do
+        Logger.warn "Unexpected response: #{String.slice(inspect(response), 0, 180)}..."
+        %{can_run: false}
+    end
 
     # REST client configuration
 
