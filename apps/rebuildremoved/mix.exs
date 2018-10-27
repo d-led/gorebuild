@@ -26,9 +26,9 @@ defmodule Rebuildremoved.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:tesla, "~> 1.0.0"},
+      {:tesla, " ~> 1.2.0"},
       {:poison, ">= 3.1.0"},
-      {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false},
+      {:dialyxir, " >= 1.0.0-rc.2", only: [:dev], runtime: false},
     ]
   end
 end
