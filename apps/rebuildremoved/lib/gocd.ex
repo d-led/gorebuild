@@ -185,13 +185,13 @@ defmodule Gocd do
 
     defp client(confirm \\ false, header_list \\ []) do
         if authentication_provided?() do
-            Tesla.build_client(
+            Tesla.client(
                 [{Tesla.Middleware.BasicAuth, Map.merge(%{username: @gocd.user, password: @gocd.password}, %{})}]
                 ++
                 headers(confirm, header_list)
             )
         else
-            Tesla.build_client(headers(confirm, header_list))
+            Tesla.client(headers(confirm, header_list))
         end
     end
 
