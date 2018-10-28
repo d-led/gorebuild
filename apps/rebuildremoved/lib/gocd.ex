@@ -113,20 +113,14 @@ defmodule Gocd do
   defp last_run_ok?(pipeline) do
     context = "last_run_ok?: Error querying pipeline #{pipeline}"
 
-    try do
-      case get(client(), "/api/pipelines/#{pipeline}/history") do
-        {:ok, %Tesla.Env{body: status}} ->
-          status |> last_run()
+    case get(client(), "/api/pipelines/#{pipeline}/history") do
+      {:ok, %Tesla.Env{body: status}} ->
+        status |> last_run()
 
-        {:error, reason} ->
-          show_error(context, reason)
-          %{can_run: false}
+      {:error, reason} ->
+        show_error(context, reason)
+        %{can_run: false}
 
-        e ->
-          show_error(context, e)
-          %{can_run: false}
-      end
-    rescue
       e ->
         show_error(context, e)
         %{can_run: false}
@@ -144,33 +138,27 @@ defmodule Gocd do
   defp schedulable_and_unpaused?(pipeline) do
     context = "schedulable_and_unpaused?: Error querying pipeline #{pipeline}"
 
-    try do
-      case get(client(), "/api/pipelines/#{pipeline}/status") do
-        {:ok, %Tesla.Env{body: %{"schedulable" => true, "paused" => false}}} ->
-          %{can_run: true}
+    case get(client(), "/api/pipelines/#{pipeline}/status") do
+      {:ok, %Tesla.Env{body: %{"schedulable" => true, "paused" => false}}} ->
+        %{can_run: true}
 
-        {:ok, %Tesla.Env{body: %{"schedulable" => schedulable, "paused" => paused}}} ->
-          Logger.info(
-            "Skipping pipeline #{pipeline}, as it's schedulable: #{schedulable}, paused: #{paused}"
-          )
+      {:ok, %Tesla.Env{body: %{"schedulable" => schedulable, "paused" => paused}}} ->
+        Logger.info(
+          "Skipping pipeline #{pipeline}, as it's schedulable: #{schedulable}, paused: #{paused}"
+        )
 
-          %{can_run: false}
+        %{can_run: false}
 
-        {:ok, %Tesla.Env{body: body}} ->
-          # perhaps, some html
-          show_error(context, body)
-          %{can_run: false}
+      {:ok, %Tesla.Env{body: body}} ->
+        # perhaps, some html
+        show_error(context, body)
+        %{can_run: false}
 
-        {:error, reason} ->
-          show_error(context, reason)
+      {:error, reason} ->
+        show_error(context, reason)
 
-        e ->
-          show_error(context, e)
-      end
-    rescue
       e ->
         show_error(context, e)
-        %{can_run: false}
     end
   end
 
