@@ -48,7 +48,15 @@ options:
 - use the simple `Dockerfile` based on the Elixir image ([Dockerfile.gorebuild](Dockerfile.gorebuild))
 - build `mix deps.get && mix compile` and start via `mix run --no-halt`
 
-## Commentary
+## Architecture
+
+### Applications
+
+- this project is an Elixir [umbrella application](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-projects.html#umbrella-projects)
+- the intent of the umbrella application was to start multiple independent GoCD automation services with independent strategies and lifetimes
+- The only project under the umbrella app is [apps/gorebuild](apps/gorebuild), solving the original problem
+
+### Commentary
 
 While the solution is not a systematically optimal one (if keeping N last artifacts is a viable feature, it should be part of GoCD), currently, it is a most pragmatic one.
 
@@ -58,7 +66,7 @@ For each pipeline, a separate process is started under the supervisor. Here, for
 
 ## Development
 
-- Starting a GoCD server, agent and gorebuild: `docker-compose up --build`
+- Start a GoCD server, agent and gorebuild: `docker-compose up --build`
 - Simulate a garbage collection via the script [simulate_gc.sh](simulate_gc.sh)
 
 ### Links to Problem Descriptions

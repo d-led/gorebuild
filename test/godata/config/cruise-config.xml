@@ -47,6 +47,5 @@
     </pipeline>
   </pipelines>
   <agents>
-    <agent hostname="5bf637b703c4" ipaddress="172.18.0.3" uuid="d824f976-b0b5-481e-8399-519ae5da00bc" />
   </agents>
 </cruise>
