@@ -11,6 +11,7 @@ defmodule Rebuildremoved.Mixfile do
       lockfile: "../../mix.lock",
       elixir: "~> 1.5",
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -29,6 +30,13 @@ defmodule Rebuildremoved.Mixfile do
       {:tesla, " ~> 1.2.0"},
       {:poison, ">= 3.1.0"},
       {:dialyxir, " >= 1.0.0-rc.2", only: [:dev], runtime: false}
+    ]
+  end
+
+  # do not start the application during the test
+  defp aliases do
+    [
+      test: "test --no-start"
     ]
   end
 end

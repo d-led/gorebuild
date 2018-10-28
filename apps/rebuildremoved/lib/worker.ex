@@ -9,7 +9,9 @@ defmodule Rebuildremoved.Worker do
     GenServer.start_link(__MODULE__, job_config, [])
   end
 
+  #
   def init(job_config) do
+    # polling after a while to not block the startup
     schedule_next(1000)
     {:ok, job_config}
   end
@@ -21,8 +23,13 @@ defmodule Rebuildremoved.Worker do
     {:noreply, job_config}
   end
 
+  def terminate(reason, _state) do
+    Logger.warn("Oops, terminating #{inspect(self())}: #{reason}")
+  end
+
   # implementation
 
+  # run the polling logic once
   defp check(job_config) do
     Logger.info("Checking: #{inspect(job_config)}")
     Gocd.trigger_if_artifacts_missing(job_config)

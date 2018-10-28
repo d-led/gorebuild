@@ -9,6 +9,7 @@ defmodule Gocd do
 
   # API
 
+  # making the start parameters visible at start time
   def start do
     Logger.warn("Starting to poll #{@gocd.url}")
 
@@ -17,6 +18,7 @@ defmodule Gocd do
     end
   end
 
+  # the main action performed for a configuration entry
   def trigger_if_artifacts_missing(job_config) do
     job_config
     |> with_status()
@@ -26,11 +28,13 @@ defmodule Gocd do
 
   # implementation
 
+  # adds the status of the pipeline to the input
   defp with_status(job_config = %{pipeline: pipeline}) do
     job_config
     |> Map.put(:status, status_of(pipeline))
   end
 
+  # finds out, whether any of the configured artifacts are missing
   defp missing_artifact?(job_config = %{paths: paths, status: %{should_run: true}}) do
     case artifacts_of_latest_run(job_config) do
       nil ->
@@ -45,18 +49,20 @@ defmodule Gocd do
     end
   end
 
-  # must have been an error upstream
+  # must have been an error upstream. No action taken is a safe bet
   defp missing_artifact?(job_config = %{}), do: job_config |> Map.put(:missing_artifact, nil)
 
   # nothing to do
   defp trigger_if_necessary(%{missing_artifact: nil}), do: true
 
+  # if there are artifacts missing, trigger the pipeline
   defp trigger_if_necessary(
          job_config = %{missing_artifact: artifact, status: %{should_run: true, can_run: true}}
        ) do
     artifact |> trigger(job_config)
   end
 
+  #
   defp trigger_if_necessary(%{pipeline: pipeline, status: %{should_run: true, can_run: false}}) do
     Logger.warn("not triggering #{pipeline}, as it currently cannot be scheduled")
   end
@@ -66,6 +72,7 @@ defmodule Gocd do
     Logger.warn("not triggering #{pipeline}, as the last run of the pipeine is not green")
   end
 
+  # query the complex status of a pipeline
   defp status_of(pipeline) do
     case schedulable_and_unpaused?(pipeline) do
       %{can_run: true} -> last_run_ok?(pipeline)
@@ -127,13 +134,6 @@ defmodule Gocd do
     end
   end
 
-  defp show_error(context, e) do
-    case e do
-      %err{} -> Logger.error("#{context}: #{inspect(err)}")
-      err -> Logger.error("#{context}: #{inspect(err) |> String.slice(0..160)}...")
-    end
-  end
-
   # https://api.gocd.org/current/#get-pipeline-status
   defp schedulable_and_unpaused?(pipeline) do
     context = "schedulable_and_unpaused?: Error querying pipeline #{pipeline}"
@@ -162,6 +162,7 @@ defmodule Gocd do
     end
   end
 
+  # last pipeline run that looks "green"
   defp last_run(%{
          "pipelines" => [_last_pipeline = %{"stages" => stages, "can_run" => can_run} | _rest]
        }) do
@@ -171,16 +172,19 @@ defmodule Gocd do
     }
   end
 
+  # no runs yet
   defp last_run(%{"pipelines" => []}) do
     Logger.warn("Pipeline seems to not have run yet...")
     %{can_run: false}
   end
 
+  #
   defp last_run(response) when is_binary(response) do
-    Logger.warn("Unexpected response: #{String.slice(response, 0, 180)}...")
+    Logger.warn("Unexpected string response: #{String.slice(response, 0, 180)}...")
     %{can_run: false}
   end
 
+  # catch-all
   defp last_run(response) do
     Logger.warn("Unexpected response: #{String.slice(inspect(response), 0, 180)}...")
     %{can_run: false}
@@ -207,5 +211,13 @@ defmodule Gocd do
 
   defp authentication_provided? do
     @gocd.password != nil && @gocd.user != nil
+  end
+
+  # common way of logging unexpected errors
+  defp show_error(context, e) do
+    case e do
+      %err{} -> Logger.error("#{context}: #{inspect(err)}")
+      err -> Logger.error("#{context}: #{inspect(err) |> String.slice(0..160)}...")
+    end
   end
 end

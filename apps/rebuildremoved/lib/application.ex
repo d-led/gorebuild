@@ -8,6 +8,7 @@ defmodule Rebuildremoved.Supervisor do
     DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
+  # starting the supervisor and showing some output for early feedback
   def init(:ok) do
     Gocd.start()
 
@@ -16,6 +17,7 @@ defmodule Rebuildremoved.Supervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
+  # starting a supervised polling process for each line of config
   def start_children do
     Application.get_env(:rebuildremoved, :artifacts)
     |> Enum.with_index()
@@ -37,6 +39,7 @@ defmodule Rebuildremoved.Application do
 
   use Application
 
+  #
   def start(_type, _args) do
     children = [
       Rebuildremoved.Supervisor
