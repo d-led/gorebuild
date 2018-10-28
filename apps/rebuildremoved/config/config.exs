@@ -11,24 +11,25 @@ use Mix.Config
 # You can configure your application as:
 #
 config :rebuildremoved,
-    delay_ms: System.get_env("GO_DELAY") || 10*1000,
-    artifacts: [
-        # e.g.:
-        # %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
-        #     paths: [
-        #         "foo/bar",
-        #         "foo/bar/start.sh"
-        #     ]
-        # },
-        # %{pipeline: "consumer", stage: "defaultStage", job: "DefaultJob",
-        #     paths: [ "bla/blup" ]
-        # }
-    ],
-    gocd: %{
-        url: System.get_env("GO_SERVER_URL") || "https://localhost:8154/go",
-        user: System.get_env("GO_USERNAME"),
-        password: System.get_env("GO_PASSWORD")
-    }
+  delay_ms: System.get_env("GO_DELAY") || 10 * 1000,
+  artifacts: [
+    # e.g.:
+    # %{pipeline: "test", stage: "defaultStage", job: "defaultJob",
+    #     paths: [
+    #         "foo/bar",
+    #         "foo/bar/start.sh"
+    #     ]
+    # },
+    # %{pipeline: "consumer", stage: "defaultStage", job: "DefaultJob",
+    #     paths: [ "bla/blup" ]
+    # }
+  ],
+  gocd: %{
+    url: System.get_env("GO_SERVER_URL") || "https://localhost:8154/go",
+    user: System.get_env("GO_USERNAME"),
+    password: System.get_env("GO_PASSWORD")
+  }
+
 #
 # and access this configuration in your application as:
 #
@@ -45,4 +46,4 @@ config :rebuildremoved,
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

@@ -11,22 +11,23 @@ defmodule Rebuildremoved.Supervisor do
   def init(:ok) do
     Gocd.start()
 
-    Logger.warn "Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms + random(10%)"
+    Logger.warn("Delay #{Application.get_env(:rebuildremoved, :delay_ms)}ms + random(10%)")
 
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
   def start_children do
     Application.get_env(:rebuildremoved, :artifacts)
-    |> Enum.with_index
+    |> Enum.with_index()
     |> Enum.map(fn {job_config, id} ->
-        spec = Supervisor.child_spec(
+      spec =
+        Supervisor.child_spec(
           {Rebuildremoved.Worker, job_config},
           id: String.to_atom("worker#{id}"),
           restart: :transient
         )
 
-        {:ok, _pid} = DynamicSupervisor.start_child(__MODULE__, spec)
+      {:ok, _pid} = DynamicSupervisor.start_child(__MODULE__, spec)
     end)
   end
 end
@@ -37,7 +38,6 @@ defmodule Rebuildremoved.Application do
   use Application
 
   def start(_type, _args) do
-
     children = [
       Rebuildremoved.Supervisor
     ]
@@ -45,7 +45,7 @@ defmodule Rebuildremoved.Application do
     opts = [strategy: :one_for_one, name: Rebuildremoved.App]
     ret = Supervisor.start_link(children, opts)
 
-      Rebuildremoved.Supervisor.start_children
+    Rebuildremoved.Supervisor.start_children()
 
     ret
   end
