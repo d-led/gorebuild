@@ -54,7 +54,7 @@ options:
 
 - this project is an Elixir [umbrella application](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-projects.html#umbrella-projects)
 - the intent of the umbrella application was to start multiple independent GoCD automation services with independent strategies and lifetimes
-- The only project under the umbrella app is [apps/gorebuild](apps/gorebuild), solving the original problem
+- The only project under the umbrella app is [apps/rebuildremoved](apps/rebuildremoved), solving the original problem
 
 ### Commentary
 
