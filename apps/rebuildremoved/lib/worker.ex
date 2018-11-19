@@ -24,7 +24,7 @@ defmodule Rebuildremoved.Worker do
   end
 
   def terminate(reason, _state) do
-    Logger.warn("Oops, terminating #{inspect(self())}: #{reason}")
+    Logger.warn("Oops, terminating #{inspect(self())}: #{inspect(reason)}")
   end
 
   # implementation
